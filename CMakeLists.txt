@@ -4,8 +4,9 @@ project(vector4 C)
 set(CMAKE_C_STANDARD 23)
 add_compile_options("-msse4" "-mavx2" "-O3")
 
-include_directories(.)
+include_directories(src)
 
-add_library(vector4 STATIC vector4.c)
+aux_source_directory(src SRC)
+add_library(vector4 STATIC ${SRC})
 add_executable(test test/main.c)
 target_link_libraries(test PRIVATE vector4)
