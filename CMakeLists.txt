@@ -8,5 +8,5 @@ include_directories(src)
 
 aux_source_directory(src SRC)
 add_library(vector4 STATIC ${SRC})
-add_executable(test test/main.c)
+add_executable(test test/debug.c)
 target_link_libraries(test PRIVATE vector4)
