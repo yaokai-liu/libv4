@@ -406,7 +406,7 @@ inline void floatMatRMulMat(FMat4 A, const FMat4 B) {
   floatVecMulMat(A[3], c);
 }
 
-inline void matAffineShear(FMat4 M, FVec4 /* treat as FVec3 */ she) {
+inline void matAffineShear(FMat4 M, const FVec4 /* treat as FVec3 */ she) {
   const FMat4 T = {{1, she[1], she[2], 0},
              {she[0], 1, she[2], 0},
              {she[0], she[1], 1, 0},
@@ -414,7 +414,7 @@ inline void matAffineShear(FMat4 M, FVec4 /* treat as FVec3 */ she) {
   floatMatLMulMat(T, M);
 }
 
-inline void matAffineRotate(FMat4 M, FVec4 /* treat as FVec3 */ axis, float angle) {
+inline void matAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, const float angle) {
   const __m128 d128 = _mm_sub_ps(_mm_load_ps(axis), _mm_set_ps(axis[3], 0, 0, 0));
   const __m128 d128_0 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(0, 0, 0, 0));
   const __m128 d128_1 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(1, 1, 1, 1));
@@ -438,7 +438,7 @@ inline void matAffineRotate(FMat4 M, FVec4 /* treat as FVec3 */ axis, float angl
   floatMatLMulMat(T, M);
 }
 
-inline void matAffineShift(FMat4 M, FVec4 /* treat as FVec3 */ dis) {
+inline void matAffineShift(FMat4 M, const FVec4 /* treat as FVec3 */ dis) {
   const FMat4 T = {{1, 0, 0, dis[0]},
                    {0, 1, 0, dis[1]},
                    {0, 0, 1, dis[2]},
@@ -467,7 +467,7 @@ inline void matAffineReflect(FMat4 M, const FVec4 /* treat as FVec3 */ axis) {
   floatMatLMulMat(T, M);
 }
 
-inline void matAffineFlip(FMat4 M, FVec4 /* treat as FVec3 */ axis) {
+inline void matAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis) {
   __m128 d128 = _mm_sub_ps(_mm_load_ps(axis), _mm_set_ps(axis[3], 0, 0, 0));
   __m128 s128 = _mm_mul_ps(d128, d128);
   s128 = _mm_hadd_ps(_mm_hadd_ps(s128, _mm_set1_ps(0)), _mm_set1_ps(0));

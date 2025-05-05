@@ -118,16 +118,16 @@ void floatAffineReflect(FAffPoint4 P, const FAffPoint4 O, const FVec4 d);
 void floatAffineFlip(FAffPoint4 P, const FAffPoint4 O, const FVec4  /* treat as FVec3 */ d);
 
 
-/// multiply a Shear effect to the M
-void matAffineShear(FMat4 M, FVec4 /* treat as FVec3 */ she);
-/// multiply a rotate effect to the M
-void matAffineRotate(FMat4 M, FVec4 /* treat as FVec3 */ axis, float angle);
-/// multiply a shift effect to the M
-void matAffineShift(FMat4 M, FVec4 /* treat as FVec3 */ dis);
-/// multiply a reflect effect to the M
+/// left multiply a Shear effect to the M
+void matAffineShear(FMat4 M, const FVec4 /* treat as FVec3 */ she);
+/// left multiply a rotate effect to the M
+void matAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, float angle);
+/// left multiply a shift effect to the M
+void matAffineShift(FMat4 M, const FVec4 /* treat as FVec3 */ dis);
+/// left multiply a reflect effect to the M
 void matAffineReflect(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
-/// multiply a flip effect to the M
-void matAffineFlip(FMat4 M, FVec4 /* treat as FVec3 */ axis);
+/// left multiply a flip effect to the M
+void matAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
 
 
 #endif //XGL_MATH_XGLM_H
