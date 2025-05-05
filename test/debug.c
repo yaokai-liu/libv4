@@ -67,19 +67,24 @@ int main() {
 //  floatAffineFlip(P, O, d);
 //  printf("%g, %g, %g, %g\n", P[0], P[1], P[2], P[3]);
 
-  FMat4 M = {
-      {1.0f, 0.0f, 0.0f, 0.0f},
-      {0.0f, 1.0f, 0.0f, 0.0f},
-      {0.0f, 0.0f, 1.0f, 0.0f},
-      {0.0f, 0.0f, 0.0f, 1.0f},
-  };
-  FVec4 v = { 1.0f, 0.0f, 0.0f, 5.0f };
+//  FMat4 M = {
+//      {1.0f, 0.0f, 0.0f, 0.0f},
+//      {0.0f, 1.0f, 0.0f, 0.0f},
+//      {0.0f, 0.0f, 1.0f, 0.0f},
+//      {0.0f, 0.0f, 0.0f, 1.0f},
+//  };
+//  FVec4 v = { 1.0f, 0.0f, 0.0f, 5.0f };
 //  matAffineReflect(M, v);
 //  matAffineFlip(M, v);
-  matAffineRotate(M, v, 3.1415926535897932384626f/ 2);
-  FAffPoint4 P = {0.0f, 2.0f, 0.0f, 1.0f};
-  floatMatMulVec(M, P);
+//  matAffineRotate(M, v, 3.1415926535897932384626f/ 2);
+//  FAffPoint4 P = {0.0f, 2.0f, 0.0f, 1.0f};
+//  floatMatMulVec(M, P);
 //  floatVecMulMat(P, M);
-  printf("%g, %g, %g, %g\n", P[0], P[1], P[2], P[3]);
+//  printf("%g, %g, %g, %g\n", P[0], P[1], P[2], P[3]);
+  FMat4 M = {};
+  floatMatDiag(M, (FVec4){1, 2, 3, 4});
+  for (uint32_t i = 0; i < 4; i ++) {
+    printf("%g, %g, %g, %g\n", M[i][0], M[i][1], M[i][2], M[i][3]);
+  }
   return 0;
 }

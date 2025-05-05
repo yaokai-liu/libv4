@@ -178,11 +178,11 @@ inline void floatVecMulMat(FVec4 a, const FMat4 b) {
   _mm_store_ps(a, m1);
 }
 
-inline void floatAffineUnitize(FAffPoint4 P) {
+inline void floatAffineNormalize(FAffPoint4 P) {
   _mm_store_ps(P, _mm_mul_ps(_mm_load_ps(P), _mm_set1_ps(1.0f / P[3])));
 }
 
-inline void floatAffineDiff(const FAffPoint4 A, const FAffPoint4 B, FVec4 d) {
+inline void floatAffineSub(const FAffPoint4 A, const FAffPoint4 B, FVec4 d) {
   __m128 a128 = _mm_mul_ps(_mm_load_ps(A), _mm_set1_ps(1.0f / A[3]));
   __m128 b128 = _mm_mul_ps(_mm_load_ps(B), _mm_set1_ps(1.0f / B[3]));
   _mm_store_ps(d, _mm_sub_ps(a128, b128));
@@ -238,6 +238,17 @@ void floatAffineFlip(FAffPoint4 P, const FAffPoint4 O, const FVec4 d) {
   __m128 result = _mm_sub_ps(_mm_add_ps(b128, _mm_mul_ps(r128, d128)), c128);
   // return
   _mm_store_ps(P, result);
+}
+
+inline void intMatDiag(IMat4 A, const IVec4 b) {
+  __m128i A_0 = _mm_set_epi32(0, 0, 0, b[0]);
+  __m128i A_1 = _mm_set_epi32(0, 0, b[1], 0);
+  __m128i A_2 = _mm_set_epi32(0, b[2], 0, 0);
+  __m128i A_3 = _mm_set_epi32(b[3], 0, 0, 0);
+  _mm_store_si128((__m128i *) A[0], A_0);
+  _mm_store_si128((__m128i *) A[1], A_1);
+  _mm_store_si128((__m128i *) A[2], A_2);
+  _mm_store_si128((__m128i *) A[3], A_3);
 }
 
 inline void intMatAdd(IMat4 A, const IMat4 B) {
@@ -321,6 +332,17 @@ inline void intMatRMulMat(IMat4 A, const IMat4 B) {
   intVecMulMat(A[3], B);
 }
 
+inline void floatMatDiag(FMat4 A, const FVec4 b) {
+  __m128 A_0 = _mm_set_ps(0.0f, 0.0f, 0.0f, b[0]);
+  __m128 A_1 = _mm_set_ps(0.0f, 0.0f, b[1], 0.0f);
+  __m128 A_2 = _mm_set_ps(0.0f, b[2], 0.0f, 0.0f);
+  __m128 A_3 = _mm_set_ps(b[3], 0.0f, 0.0f, 0.0f);
+  _mm_store_ps(A[0], A_0);
+  _mm_store_ps(A[1], A_1);
+  _mm_store_ps(A[2], A_2);
+  _mm_store_ps(A[3], A_3);
+}
+
 inline void floatMatAdd(FMat4 A, const FMat4 B) {
   floatVecAdd(A[0], B[0]);
   floatVecAdd(A[1], B[1]);
@@ -398,19 +420,32 @@ inline void floatMatLMulMat(const FMat4 A, FMat4 B) {
 }
 
 inline void floatMatRMulMat(FMat4 A, const FMat4 B) {
-  FMat4 c = {};
-  floatMatTrCopy(c, B);
-  floatVecMulMat(A[0], c);
-  floatVecMulMat(A[1], c);
-  floatVecMulMat(A[2], c);
-  floatVecMulMat(A[3], c);
+  FMat4 C = {};
+  floatMatTrCopy(C, B);
+  floatVecMulMat(A[0], C);
+  floatVecMulMat(A[1], C);
+  floatVecMulMat(A[2], C);
+  floatVecMulMat(A[3], C);
+}
+
+inline void matAffineScale(FMat4 M, const FVec4 /* treat as FVec3 */ rate) {
+  const FVec4 _rate = {rate[0], rate[1], rate[2], 0};
+  floatMatScaleVec(M, _rate);
 }
 
 inline void matAffineShear(FMat4 M, const FVec4 /* treat as FVec3 */ she) {
   const FMat4 T = {{1, she[1], she[2], 0},
-             {she[0], 1, she[2], 0},
-             {she[0], she[1], 1, 0},
-             {0, 0, 0, 1}};
+                   {she[0], 1, she[2], 0},
+                   {she[0], she[1], 1, 0},
+                   {0, 0, 0, 1}};
+  floatMatLMulMat(T, M);
+}
+
+inline void matAffineShift(FMat4 M, const FVec4 /* treat as FVec3 */ dis) {
+  const FMat4 T = {{1, 0, 0, dis[0]},
+                   {0, 1, 0, dis[1]},
+                   {0, 0, 1, dis[2]},
+                   {0, 0, 0, 1}};
   floatMatLMulMat(T, M);
 }
 
@@ -435,14 +470,6 @@ inline void matAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, cons
   _mm_store_ps(T[0], result_0);
   _mm_store_ps(T[1], result_1);
   _mm_store_ps(T[2], result_2);
-  floatMatLMulMat(T, M);
-}
-
-inline void matAffineShift(FMat4 M, const FVec4 /* treat as FVec3 */ dis) {
-  const FMat4 T = {{1, 0, 0, dis[0]},
-                   {0, 1, 0, dis[1]},
-                   {0, 0, 1, dis[2]},
-                   {0, 0, 0, 1}};
   floatMatLMulMat(T, M);
 }
 
