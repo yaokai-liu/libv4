@@ -206,7 +206,7 @@ inline void floatAffineReflect(FAffPoint4 P, const FAffPoint4 O, const FVec4 d) 
   // Vector3 d
   const __m128 d128 = _mm_sub_ps(_mm_load_ps(d), _mm_set_ps(0, 0, 0, d[3]));
   // calculate OP·d and sqrt(d·d)
-  const __m128 z128 = _mm_set1_ps(0);
+  const __m128 z128 = _mm_setzero_ps();
   __m128 t128 = _mm_mul_ps(c128, d128);
   __m128 s128 = _mm_mul_ps(d128, d128);
   t128 = _mm_hadd_ps(_mm_hadd_ps(t128, z128), z128);
@@ -234,7 +234,7 @@ void floatAffineFlip(FAffPoint4 P, const FAffPoint4 O, const FVec4 d) {
   // calculate OP·d and sqrt(d·d)
   __m128 t128 = _mm_mul_ps(c128, d128);
   __m128 s128 = _mm_mul_ps(d128, d128);
-  __m128 z128 = _mm_set1_ps(0);
+  __m128 z128 = _mm_setzero_ps();
   t128 = _mm_hadd_ps(_mm_hadd_ps(t128, z128), z128);
   s128 = _mm_hadd_ps(_mm_hadd_ps(s128, z128), z128);
   t128 = _mm_shuffle_ps(t128, t128, _MM_SHUFFLE(0, 0, 0, 0));
@@ -505,7 +505,7 @@ inline void matFromAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, 
 inline void matFromAffineReflect(FMat4 M, const FVec4 /* treat as FVec3 */ axis) {
   __m128 d128 = _mm_sub_ps(_mm_load_ps(axis), _mm_set_ps(axis[3], 0, 0, 0));
   __m128 s128 = _mm_mul_ps(d128, d128);
-  s128 = _mm_hadd_ps(_mm_hadd_ps(s128, _mm_set1_ps(0)), _mm_set1_ps(0));
+  s128 = _mm_hadd_ps(_mm_hadd_ps(s128, _mm_setzero_ps()), _mm_setzero_ps());
   s128 = _mm_shuffle_ps(s128, s128, _MM_SHUFFLE(0, 0, 0, 0));
   __m128 d128_0 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(0, 0, 0, 0));
   __m128 d128_1 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(1, 1, 1, 1));
@@ -525,7 +525,7 @@ inline void matFromAffineReflect(FMat4 M, const FVec4 /* treat as FVec3 */ axis)
 inline void matFromAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis) {
   __m128 d128 = _mm_sub_ps(_mm_load_ps(axis), _mm_set_ps(axis[3], 0, 0, 0));
   __m128 s128 = _mm_mul_ps(d128, d128);
-  s128 = _mm_hadd_ps(_mm_hadd_ps(s128, _mm_set1_ps(0)), _mm_set1_ps(0));
+  s128 = _mm_hadd_ps(_mm_hadd_ps(s128, _mm_setzero_ps()), _mm_setzero_ps());
   s128 = _mm_shuffle_ps(s128, s128, _MM_SHUFFLE(0, 0, 0, 0));
   __m128 d128_0 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(0, 0, 0, 0));
   __m128 d128_1 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(1, 1, 1, 1));
@@ -540,6 +540,69 @@ inline void matFromAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis) {
   _mm_store_ps(M[1], d128_1);
   _mm_store_ps(M[2], d128_2);
   _mm_store_ps(M[3], _mm_setr_ps(0, 0, 0, 1));
+}
+
+inline void matFromLookAt(FMat4 M, const FAffPoint4 eye, const FVec4 look, const FVec4 up) {
+  constexpr int r1 = _MM_SHUFFLE(3, 0, 2, 1);
+  constexpr int r2 = _MM_SHUFFLE(3, 1, 0, 2);
+  __m128 e128 = _mm_div_ps(_mm_load_ps(eye), _mm_set1_ps(-eye[3]));
+  __m128 l128 = _mm_sub_ps(_mm_load_ps(look), _mm_set_ps(look[3], 0, 0, 0));
+  __m128 u128 = _mm_sub_ps(_mm_load_ps(up), _mm_set_ps(up[3], 0, 0, 0));
+  __m128 tmp0 = _mm_shuffle_ps(l128, l128, r1);
+  __m128 tmp1 = _mm_shuffle_ps(u128, u128, r2);
+  __m128 tmp2 = _mm_shuffle_ps(l128, l128, r2);
+  __m128 tmp3 = _mm_shuffle_ps(u128, u128, r1);
+  __m128 r128 = _mm_sub_ps(_mm_mul_ps(tmp2, tmp3), _mm_mul_ps(tmp0, tmp1));
+  __m128 s128 = _mm_hadd_ps(_mm_hadd_ps(_mm_mul_ps(l128, l128), _mm_setzero_ps()), _mm_setzero_ps());
+  __m128 t128 = _mm_hadd_ps(_mm_hadd_ps(_mm_mul_ps(u128, u128), _mm_setzero_ps()), _mm_setzero_ps());
+  __m128 w128 = _mm_hadd_ps(_mm_hadd_ps(_mm_mul_ps(r128, r128), _mm_setzero_ps()), _mm_setzero_ps());
+  l128 = _mm_div_ps(l128, _mm_shuffle_ps(s128, s128, _MM_SHUFFLE(0, 0, 0, 0)));
+  u128 = _mm_div_ps(u128, _mm_shuffle_ps(t128, t128, _MM_SHUFFLE(0, 0, 0, 0)));
+  r128 = _mm_div_ps(r128, _mm_shuffle_ps(w128, w128, _MM_SHUFFLE(0, 0, 0, 0)));
+  __m128 t0 = _mm_unpacklo_ps(l128, u128);
+  __m128 t1 = _mm_unpackhi_ps(l128, u128);
+  __m128 t2 = _mm_unpacklo_ps(r128, e128);
+  __m128 t3 = _mm_unpackhi_ps(r128, e128);
+  _mm_store_ps(M[0], _mm_movelh_ps(t0, t2));
+  _mm_store_ps(M[1], _mm_movehl_ps(t2, t0));
+  _mm_store_ps(M[2], _mm_movelh_ps(t1, t3));
+  _mm_store_ps(M[3], _mm_movehl_ps(t3, t1));
+}
+
+
+inline void matFromOrthoProjection(FMat4 M, const float a[2], const float b[2], const float c[2]) {
+  float s1 = a[0] + a[1];
+  float s2 = b[0] + b[1];
+  float s3 = c[0] + c[1];
+  float d1 = a[1] - a[0];
+  float d2 = b[1] - b[0];
+  float d3 = c[1] - c[0];
+  __m128 T_0 = _mm_setr_ps(2 / d1, 0, 0, -s1 / d1);
+  __m128 T_1 = _mm_setr_ps(0, 2 / d2, 0, -s2 / d2);
+  __m128 T_2 = _mm_setr_ps(0, 0, 2 / d3, -s3 / d3);
+  __m128 T_3 = _mm_setr_ps(0, 0, 0, 1);
+  _mm_store_ps(M[0], T_0);
+  _mm_store_ps(M[1], T_1);
+  _mm_store_ps(M[2], T_2);
+  _mm_store_ps(M[3], T_3);
+}
+
+inline void matFromPersProjection(FMat4 M, const FVec2 a, const FVec2 b, const FVec2 c) {
+  float s1 = a[0] + a[1];
+  float s2 = b[0] + b[1];
+  float s3 = c[0] + c[1];
+  float d1 = a[1] - a[0];
+  float d2 = b[1] - b[0];
+  float d3 = c[1] - c[0];
+  float r  =c[0] * c[1];
+  __m128 T_0 = _mm_setr_ps(2 * c[0] / d1, 0, -s1 / d1, 0);
+  __m128 T_1 = _mm_setr_ps(0, 2 * c[0] / d2, -s2 / d2, 0);
+  __m128 T_2 = _mm_setr_ps(0, 0,  s3 / d3,  -2 * r / d3);
+  __m128 T_3 = _mm_setr_ps(0, 0, 1, 0);
+  _mm_store_ps(M[0], T_0);
+  _mm_store_ps(M[1], T_1);
+  _mm_store_ps(M[2], T_2);
+  _mm_store_ps(M[3], T_3);
 }
 
 

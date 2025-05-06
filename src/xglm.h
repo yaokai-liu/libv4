@@ -14,11 +14,11 @@
 /// Vector that has 2 integer elements
 typedef int32_t IVec2[2];
 /// Vector that has 2 float number elements
-typedef int32_t FVec2[2];
+typedef float FVec2[2];
 /// 2x2 Matrix that elements are integer
 typedef int32_t IMat2[2];
 /// 2x2 Matrix that elements are float point number
-typedef int32_t FMat2[2];
+typedef float FMat2[2];
 /// Vector that has 4 integer elements
 typedef int32_t IVec4[4];
 /// Vector that has 4 float number elements
@@ -146,6 +146,33 @@ void matFromAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, float a
 void matFromAffineReflect(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
 /// make M be the flip effect
 void matFromAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
+
+
+/**
+ * make M be a view transformation
+ * @param M where the output store
+ * @param eye the position the camera at
+ * @param look target direction the camera look at
+ * @param up up direction of the camera, which must be orthogonal with the param `look`
+ */
+void matFromLookAt(FMat4 M, const FAffPoint4 eye, const FVec4 look, const FVec4 up);
+/**
+ * make M be a orthographic projection matrix
+ * @param M where the output store
+ * @param a box [a1, a2] of axis x
+ * @param b box [b1, b2] of axis y
+ * @param c box [c1, c2] of axis z
+ */
+void matFromOrthoProjection(FMat4 M, const float a[2], const float b[2], const float c[2]);
+/**
+ * make M be a perspective projection matrix
+ * @param M where the output store
+ * @param a box [a1, a2] of axis x
+ * @param b box [b1, b2] of axis y
+ * @param c box [c1, c2] of axis z
+ */
+void matFromPersProjection(FMat4 M, const FVec2 a, const FVec2 b, const FVec2 c);
+
 
 /// left multiply a scale effect to the M
 void matAffineScale(FMat4 M, const FVec4 /* treat as FVec3 */ rate);
