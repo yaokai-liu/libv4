@@ -49,8 +49,8 @@ int32_t intVecInnerProduct(const IVec4 multiplier, const IVec4 multiplicand);
 int32_t intVecConvProduct(const IVec4 multiplier, const IVec4 multiplicand);
 
 
-/// a = transpose(a * b)
-void intVecMulMat(IVec4 a, const IMat4 b);
+/// a = transpose(a * B)
+void intVecMulMat(IVec4 a, const IMat4 B);
 
 /// Addend: a[i] = a[i] + b[i]
 void floatVecAdd(FVec4 summand, const FVec4 addend);
@@ -69,8 +69,8 @@ float floatVecConvProduct(const FVec4 multiplier, const FVec4 multiplicand);
 /// Cross Multiple: a[i] = a[i] × b[i]
 void floatVec3CrossMul(FVec4 multiplier, const FVec4 multiplicand);
 
-/// a = transpose(a * b)
-void floatVecMulMat(FVec4 a, const FMat4 b);
+/// a = transpose(a * B)
+void floatVecMulMat(FVec4 a, const FMat4 B);
 
 
 /// A = diag(b[0], b[1], b[2], b[3])
@@ -133,6 +133,19 @@ void floatAffineReflect(FAffPoint4 P, const FAffPoint4 O, const FVec4 d);
  */
 void floatAffineFlip(FAffPoint4 P, const FAffPoint4 O, const FVec4  /* treat as FVec3 */ d);
 
+
+/// make M be the scale effect
+void matFromAffineScale(FMat4 M, const FVec4 /* treat as FVec3 */ rate);
+/// make M be the shear effect
+void matFromAffineShear(FMat4 M, const FVec4 /* treat as FVec3 */ she);
+/// make M be the shift effect
+void matFromAffineShift(FMat4 M, const FVec4 /* treat as FVec3 */ dis);
+/// make M be the rotate effect
+void matFromAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, float angle);
+/// make M be the reflect effect
+void matFromAffineReflect(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
+/// make M be the flip effect
+void matFromAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
 
 /// left multiply a scale effect to the M
 void matAffineScale(FMat4 M, const FVec4 /* treat as FVec3 */ rate);

@@ -77,16 +77,20 @@ inline int32_t intVecConvProduct(const IVec4 multiplier, const IVec4 multiplican
   return res;
 }
 
-inline void intVecMulMat(IVec4 a, const IMat4 b) {
-  __m128i m1;
-  IVec4 c = {
-      [0] = intVecInnerProduct(a, b[0]),
-      [1] = intVecInnerProduct(a, b[1]),
-      [2] = intVecInnerProduct(a, b[2]),
-      [3] = intVecInnerProduct(a, b[3]),
-  };
-  m1 = _mm_load_si128((const __m128i *) c);
-  _mm_store_si128((__m128i *) a, m1);
+inline void intVecMulMat(IVec4 a, const IMat4 B) {
+  __m128i v = _mm_load_si128((__m128i *) a);
+  __m128i B_0 = _mm_load_si128((__m128i *) B[0]);
+  __m128i B_1 = _mm_load_si128((__m128i *) B[1]);
+  __m128i B_2 = _mm_load_si128((__m128i *) B[2]);
+  __m128i B_3 = _mm_load_si128((__m128i *) B[3]);
+  B_0 = _mm_mul_epi32(v, B_0);
+  B_1 = _mm_mul_epi32(v, B_1);
+  B_2 = _mm_mul_epi32(v, B_2);
+  B_3 = _mm_mul_epi32(v, B_3);
+  __m128i s = _mm_hadd_epi32(B_0, B_1);
+  __m128i t = _mm_hadd_epi32(B_2, B_3);
+  __m128i w = _mm_hadd_epi32(s, t);
+  _mm_store_si128((__m128i *) a, w);
 }
 
 
@@ -166,16 +170,20 @@ inline void floatVec3CrossMul(FVec4 multiplier, const FVec4 multiplicand) {
   _mm_store_ps(multiplier, c);
 }
 
-inline void floatVecMulMat(FVec4 a, const FMat4 b) {
-  __m128 m1;
-  FVec4 c = {
-      [0] = floatVecInnerProduct(a, b[0]),
-      [1] = floatVecInnerProduct(a, b[1]),
-      [2] = floatVecInnerProduct(a, b[2]),
-      [3] = floatVecInnerProduct(a, b[3]),
-  };
-  m1 = _mm_load_ps(c);
-  _mm_store_ps(a, m1);
+inline void floatVecMulMat(FVec4 a, const FMat4 B) {
+  __m128 v = _mm_load_ps(a);
+  __m128 B_0 = _mm_load_ps(B[0]);
+  __m128 B_1 = _mm_load_ps(B[1]);
+  __m128 B_2 = _mm_load_ps(B[2]);
+  __m128 B_3 = _mm_load_ps(B[3]);
+  B_0 = _mm_mul_ps(v, B_0);
+  B_1 = _mm_mul_ps(v, B_1);
+  B_2 = _mm_mul_ps(v, B_2);
+  B_3 = _mm_mul_ps(v, B_3);
+  __m128 s = _mm_hadd_ps(B_0, B_1);
+  __m128 t = _mm_hadd_ps(B_2, B_3);
+  __m128 w = _mm_hadd_ps(s, t);
+  _mm_store_ps(a, w);
 }
 
 inline void floatAffineNormalize(FAffPoint4 P) {
@@ -288,15 +296,19 @@ inline void intMatScaleMat(IMat4 A, const IMat4 B) {
 }
 
 inline void intMatMulVec(const IMat4 A, IVec4 b) {
-  __m128i m1;
-  IVec4 c = {
-    [0] = intVecInnerProduct(A[0], b),
-    [1] = intVecInnerProduct(A[1], b),
-    [2] = intVecInnerProduct(A[2], b),
-    [3] = intVecInnerProduct(A[3], b),
-  };
-  m1 = _mm_load_si128((const __m128i *) c);
-  _mm_store_si128((__m128i *) b, m1);
+  __m128i A_0 = _mm_load_si128((__m128i *) A[0]);
+  __m128i A_1 = _mm_load_si128((__m128i *) A[1]);
+  __m128i A_2 = _mm_load_si128((__m128i *) A[2]);
+  __m128i A_3 = _mm_load_si128((__m128i *) A[3]);
+  __m128i v = _mm_load_si128((__m128i *) b);
+  A_0 = _mm_mul_epi32(v, A_0);
+  A_1 = _mm_mul_epi32(v, A_1);
+  A_2 = _mm_mul_epi32(v, A_2);
+  A_3 = _mm_mul_epi32(v, A_3);
+  __m128i s = _mm_hadd_epi32(A_0, A_1);
+  __m128i t = _mm_hadd_epi32(A_2, A_3);
+  __m128i w = _mm_hadd_epi32(s, t);
+  _mm_store_si128((__m128i *) b, w);
 }
 
 inline void intMatTrCopy(IMat4 M_T, const IMat4 A) {
@@ -380,15 +392,19 @@ inline void floatMatScaleMat(FMat4 A, const FMat4 B) {
 }
 
 inline void floatMatMulVec(const FMat4 A, FVec4 b) {
-  __m128 m1;
-  FVec4 c = {
-    [0] = floatVecInnerProduct(A[0], b),
-    [1] = floatVecInnerProduct(A[1], b),
-    [2] = floatVecInnerProduct(A[2], b),
-    [3] = floatVecInnerProduct(A[3], b),
-  };
-  m1 = _mm_load_ps(c);
-  _mm_store_ps(b, m1);
+  __m128 v = _mm_load_ps(b);
+  __m128 A_0 = _mm_load_ps(A[0]);
+  __m128 A_1 = _mm_load_ps(A[1]);
+  __m128 A_2 = _mm_load_ps(A[2]);
+  __m128 A_3 = _mm_load_ps(A[3]);
+  A_0 = _mm_mul_ps(v, A_0);
+  A_1 = _mm_mul_ps(v, A_1);
+  A_2 = _mm_mul_ps(v, A_2);
+  A_3 = _mm_mul_ps(v, A_3);
+  __m128 s = _mm_hadd_ps(A_0, A_1);
+  __m128 t = _mm_hadd_ps(A_2, A_3);
+  __m128 w = _mm_hadd_ps(s, t);
+  _mm_store_ps(b, w);
 }
 
 inline void floatMatTrCopy(FMat4 M_T, const FMat4 M) {
@@ -428,89 +444,136 @@ inline void floatMatRMulMat(FMat4 A, const FMat4 B) {
   floatVecMulMat(A[3], C);
 }
 
-inline void matAffineScale(FMat4 M, const FVec4 /* treat as FVec3 */ rate) {
-  const FVec4 _rate = {rate[0], rate[1], rate[2], 0};
-  floatMatScaleVec(M, _rate);
+
+inline void matFromAffineScale(FMat4 M, const FVec4 /* treat as FVec3 */ rate) {
+  __m128 T_0 = _mm_setr_ps(rate[0], 0, 0, 0);
+  __m128 T_1 = _mm_setr_ps(0, rate[1], 0, 0);
+  __m128 T_2 = _mm_setr_ps(0, 0, rate[2], 0);
+  __m128 T_3 = _mm_setr_ps(0, 0, 0, 1);
+  _mm_store_ps(M[0], T_0);
+  _mm_store_ps(M[1], T_1);
+  _mm_store_ps(M[2], T_2);
+  _mm_store_ps(M[3], T_3);
 }
 
-inline void matAffineShear(FMat4 M, const FVec4 /* treat as FVec3 */ she) {
-  const FMat4 T = {{1, she[1], she[2], 0},
-                   {she[0], 1, she[2], 0},
-                   {she[0], she[1], 1, 0},
-                   {0, 0, 0, 1}};
-  floatMatLMulMat(T, M);
+inline void matFromAffineShear(FMat4 M, const FVec4 /* treat as FVec3 */ she) {
+  __m128 T_0 = _mm_setr_ps(1, she[1], she[2], 0);
+  __m128 T_1 = _mm_setr_ps(she[0], 1, she[2], 0);
+  __m128 T_2 = _mm_setr_ps(she[0], she[1], 1, 0);
+  __m128 T_3 = _mm_setr_ps(0, 0, 0, 1);
+  _mm_store_ps(M[0], T_0);
+  _mm_store_ps(M[1], T_1);
+  _mm_store_ps(M[2], T_2);
+  _mm_store_ps(M[3], T_3);
 }
 
-inline void matAffineShift(FMat4 M, const FVec4 /* treat as FVec3 */ dis) {
-  const FMat4 T = {{1, 0, 0, dis[0]},
-                   {0, 1, 0, dis[1]},
-                   {0, 0, 1, dis[2]},
-                   {0, 0, 0, 1}};
-  floatMatLMulMat(T, M);
+inline void matFromAffineShift(FMat4 M, const FVec4 /* treat as FVec3 */ dis) {
+  __m128 T_0 = _mm_setr_ps(1, 0, 0, dis[0]);
+  __m128 T_1 = _mm_setr_ps(0, 1, 0, dis[1]);
+  __m128 T_2 = _mm_setr_ps(0, 0, 1, dis[2]);
+  __m128 T_3 = _mm_setr_ps(0, 0, 0, 1);
+  _mm_store_ps(M[0], T_0);
+  _mm_store_ps(M[1], T_1);
+  _mm_store_ps(M[2], T_2);
+  _mm_store_ps(M[3], T_3);
 }
 
-inline void matAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, const float angle) {
+inline void matFromAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, float angle) {
   const __m128 d128 = _mm_sub_ps(_mm_load_ps(axis), _mm_set_ps(axis[3], 0, 0, 0));
   const __m128 d128_0 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(0, 0, 0, 0));
   const __m128 d128_1 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(1, 1, 1, 1));
   const __m128 d128_2 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(2, 2, 2, 2));
-  const __m128 i128_0 = _mm_set_ps(0.0f, 0.0f, 0.0f, cosf(angle));
-  const __m128 i128_1 = _mm_set_ps(0.0f, 0.0f, cosf(angle), 0.0f);
-  const __m128 i128_2 = _mm_set_ps(0.0f, cosf(angle), 0.0f, 0.0f);
-  const __m128 j128_0 = _mm_mul_ps(_mm_set1_ps(sinf(angle)), _mm_set_ps(0.0f, axis[1],-axis[2], 0.0f));
-  const __m128 j128_1 = _mm_mul_ps(_mm_set1_ps(sinf(angle)), _mm_set_ps(0.0f, -axis[0], 0.0f,axis[2]));
-  const __m128 j128_2 = _mm_mul_ps(_mm_set1_ps(sinf(angle)), _mm_set_ps(0.0f, 0.0f, axis[0],-axis[1]));
+  const __m128 i128_0 = _mm_setr_ps(cosf(angle), 0.0f,0.0f, 0.0f);
+  const __m128 i128_1 = _mm_setr_ps(0.0f, cosf(angle),0.0f, 0.0f);
+  const __m128 i128_2 = _mm_setr_ps(0.0f, 0.0f, cosf(angle),0.0f);
+  const __m128 j128_0 = _mm_mul_ps(_mm_set1_ps(sinf(angle)), _mm_setr_ps(    0.0f, -axis[2],  axis[1],0.0f));
+  const __m128 j128_1 = _mm_mul_ps(_mm_set1_ps(sinf(angle)), _mm_setr_ps( axis[2],     0.0f, -axis[0],0.0f));
+  const __m128 j128_2 = _mm_mul_ps(_mm_set1_ps(sinf(angle)), _mm_setr_ps(-axis[1],  axis[0],     0.0f,0.0f));
   const __m128 k128_0 = _mm_mul_ps(_mm_set1_ps(1.0f - cosf(angle)), _mm_mul_ps(d128_0, d128));
   const __m128 k128_1 = _mm_mul_ps(_mm_set1_ps(1.0f - cosf(angle)), _mm_mul_ps(d128_1, d128));
   const __m128 k128_2 = _mm_mul_ps(_mm_set1_ps(1.0f - cosf(angle)), _mm_mul_ps(d128_2, d128));
   const __m128 result_0 = _mm_add_ps(_mm_add_ps(i128_0, j128_0), k128_0);
   const __m128 result_1 = _mm_add_ps(_mm_add_ps(i128_1, j128_1), k128_1);
   const __m128 result_2 = _mm_add_ps(_mm_add_ps(i128_2, j128_2), k128_2);
-  FMat4 T = {[3] = {0, 0, 0, 1}};
-  _mm_store_ps(T[0], result_0);
-  _mm_store_ps(T[1], result_1);
-  _mm_store_ps(T[2], result_2);
+  const __m128 result_3 = _mm_setr_ps(0, 0, 0, 1);
+  _mm_store_ps(M[0], result_0);
+  _mm_store_ps(M[1], result_1);
+  _mm_store_ps(M[2], result_2);
+  _mm_store_ps(M[3], result_3);
+}
+
+inline void matFromAffineReflect(FMat4 M, const FVec4 /* treat as FVec3 */ axis) {
+  __m128 d128 = _mm_sub_ps(_mm_load_ps(axis), _mm_set_ps(axis[3], 0, 0, 0));
+  __m128 s128 = _mm_mul_ps(d128, d128);
+  s128 = _mm_hadd_ps(_mm_hadd_ps(s128, _mm_set1_ps(0)), _mm_set1_ps(0));
+  s128 = _mm_shuffle_ps(s128, s128, _MM_SHUFFLE(0, 0, 0, 0));
+  __m128 d128_0 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(0, 0, 0, 0));
+  __m128 d128_1 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(1, 1, 1, 1));
+  __m128 d128_2 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(2, 2, 2, 2));
+  d128_0 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_0, d128));
+  d128_1 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_1, d128));
+  d128_2 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_2, d128));
+  d128_0 = _mm_sub_ps(_mm_setr_ps(1.0f, 0.0f, 0.0f, 0.0f), _mm_div_ps(d128_0, s128));
+  d128_1 = _mm_sub_ps(_mm_setr_ps(0.0f, 1.0f, 0.0f, 0.0f), _mm_div_ps(d128_1, s128));
+  d128_2 = _mm_sub_ps(_mm_setr_ps(0.0f, 0.0f, 1.0f, 0.0f), _mm_div_ps(d128_2, s128));
+  _mm_store_ps(M[0], d128_0);
+  _mm_store_ps(M[1], d128_1);
+  _mm_store_ps(M[2], d128_2);
+  _mm_store_ps(M[3], _mm_setr_ps(0, 0, 0, 1));
+}
+
+inline void matFromAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis) {
+  __m128 d128 = _mm_sub_ps(_mm_load_ps(axis), _mm_set_ps(axis[3], 0, 0, 0));
+  __m128 s128 = _mm_mul_ps(d128, d128);
+  s128 = _mm_hadd_ps(_mm_hadd_ps(s128, _mm_set1_ps(0)), _mm_set1_ps(0));
+  s128 = _mm_shuffle_ps(s128, s128, _MM_SHUFFLE(0, 0, 0, 0));
+  __m128 d128_0 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(0, 0, 0, 0));
+  __m128 d128_1 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(1, 1, 1, 1));
+  __m128 d128_2 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(2, 2, 2, 2));
+  d128_0 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_0, d128));
+  d128_1 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_1, d128));
+  d128_2 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_2, d128));
+  d128_0 = _mm_sub_ps(_mm_div_ps(d128_0, s128), _mm_setr_ps(1.0f, 0.0f, 0.0f, 0.0f));
+  d128_1 = _mm_sub_ps(_mm_div_ps(d128_1, s128), _mm_setr_ps(0.0f, 1.0f, 0.0f, 0.0f));
+  d128_2 = _mm_sub_ps(_mm_div_ps(d128_2, s128), _mm_setr_ps(0.0f, 0.0f, 1.0f, 0.0f));
+  _mm_store_ps(M[0], d128_0);
+  _mm_store_ps(M[1], d128_1);
+  _mm_store_ps(M[2], d128_2);
+  _mm_store_ps(M[3], _mm_setr_ps(0, 0, 0, 1));
+}
+
+
+inline void matAffineScale(FMat4 M, const FVec4 /* treat as FVec3 */ rate) {
+  const FVec4 _rate = {rate[0], rate[1], rate[2], 0};
+  floatMatScaleVec(M, _rate);
+}
+
+inline void matAffineShear(FMat4 M, const FVec4 /* treat as FVec3 */ she) {
+  FMat4 T = {};
+  matFromAffineShear(T, she);
+  floatMatLMulMat(T, M);
+}
+
+inline void matAffineShift(FMat4 M, const FVec4 /* treat as FVec3 */ dis) {
+  FMat4 T = {};
+  matFromAffineShift(T, dis);
+  floatMatLMulMat(T, M);
+}
+
+inline void matAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, const float angle) {
+  FMat4 T = {};
+  matFromAffineRotate(T, axis, angle);
   floatMatLMulMat(T, M);
 }
 
 inline void matAffineReflect(FMat4 M, const FVec4 /* treat as FVec3 */ axis) {
-  __m128 d128 = _mm_sub_ps(_mm_load_ps(axis), _mm_set_ps(axis[3], 0, 0, 0));
-  __m128 s128 = _mm_mul_ps(d128, d128);
-  s128 = _mm_hadd_ps(_mm_hadd_ps(s128, _mm_set1_ps(0)), _mm_set1_ps(0));
-  s128 = _mm_shuffle_ps(s128, s128, _MM_SHUFFLE(0, 0, 0, 0));
-  __m128 d128_0 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(0, 0, 0, 0));
-  __m128 d128_1 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(1, 1, 1, 1));
-  __m128 d128_2 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(2, 2, 2, 2));
-  d128_0 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_0, d128));
-  d128_1 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_1, d128));
-  d128_2 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_2, d128));
-  d128_0 = _mm_sub_ps(_mm_set_ps(0.0f, 0.0f, 0.0f, 1.0f), _mm_div_ps(d128_0, s128));
-  d128_1 = _mm_sub_ps(_mm_set_ps(0.0f, 0.0f, 1.0f, 0.0f), _mm_div_ps(d128_1, s128));
-  d128_2 = _mm_sub_ps(_mm_set_ps(0.0f, 1.0f, 0.0f, 0.0f), _mm_div_ps(d128_2, s128));
-  FMat4 T = {[3] = {0, 0, 0, 1}};
-  _mm_store_ps(T[0], d128_0);
-  _mm_store_ps(T[1], d128_1);
-  _mm_store_ps(T[2], d128_2);
+  FMat4 T = {};
+  matFromAffineReflect(T, axis);
   floatMatLMulMat(T, M);
 }
 
 inline void matAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis) {
-  __m128 d128 = _mm_sub_ps(_mm_load_ps(axis), _mm_set_ps(axis[3], 0, 0, 0));
-  __m128 s128 = _mm_mul_ps(d128, d128);
-  s128 = _mm_hadd_ps(_mm_hadd_ps(s128, _mm_set1_ps(0)), _mm_set1_ps(0));
-  s128 = _mm_shuffle_ps(s128, s128, _MM_SHUFFLE(0, 0, 0, 0));
-  __m128 d128_0 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(0, 0, 0, 0));
-  __m128 d128_1 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(1, 1, 1, 1));
-  __m128 d128_2 = _mm_shuffle_ps(d128, d128, _MM_SHUFFLE(2, 2, 2, 2));
-  d128_0 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_0, d128));
-  d128_1 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_1, d128));
-  d128_2 = _mm_mul_ps(_mm_set1_ps(2.0f), _mm_mul_ps(d128_2, d128));
-  d128_0 = _mm_sub_ps(_mm_div_ps(d128_0, s128), _mm_set_ps(0.0f, 0.0f, 0.0f, 1.0f));
-  d128_1 = _mm_sub_ps(_mm_div_ps(d128_1, s128), _mm_set_ps(0.0f, 0.0f, 1.0f, 0.0f));
-  d128_2 = _mm_sub_ps(_mm_div_ps(d128_2, s128), _mm_set_ps(0.0f, 1.0f, 0.0f, 0.0f));
-  FMat4 T = {[3] = {0, 0, 0, 1}};
-  _mm_store_ps(T[0], d128_0);
-  _mm_store_ps(T[1], d128_1);
-  _mm_store_ps(T[2], d128_2);
+  FMat4 T = {};
+  matFromAffineFlip(T, axis);
   floatMatLMulMat(T, M);
 }
