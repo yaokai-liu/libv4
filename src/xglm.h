@@ -171,7 +171,7 @@ void matFromOrthoProjection(FMat4 M, const float a[2], const float b[2], const f
  * @param b box [b1, b2] of axis y
  * @param c box [c1, c2] of axis z
  */
-void matFromPersProjection(FMat4 M, const FVec2 a, const FVec2 b, const FVec2 c);
+void matFromPersProjection(FMat4 M, const float a[2], const float b[2], const float c[2]);
 
 
 /// left multiply a scale effect to the M

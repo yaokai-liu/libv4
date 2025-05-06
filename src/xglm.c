@@ -571,12 +571,9 @@ inline void matFromLookAt(FMat4 M, const FAffPoint4 eye, const FVec4 look, const
 
 
 inline void matFromOrthoProjection(FMat4 M, const float a[2], const float b[2], const float c[2]) {
-  float s1 = a[0] + a[1];
-  float s2 = b[0] + b[1];
-  float s3 = c[0] + c[1];
-  float d1 = a[1] - a[0];
-  float d2 = b[1] - b[0];
-  float d3 = c[1] - c[0];
+  float s1 = a[0] + a[1], d1 = a[1] - a[0];
+  float s2 = b[0] + b[1], d2 = b[1] - b[0];
+  float s3 = c[0] + c[1], d3 = c[1] - c[0];
   __m128 T_0 = _mm_setr_ps(2 / d1, 0, 0, -s1 / d1);
   __m128 T_1 = _mm_setr_ps(0, 2 / d2, 0, -s2 / d2);
   __m128 T_2 = _mm_setr_ps(0, 0, 2 / d3, -s3 / d3);
@@ -587,13 +584,10 @@ inline void matFromOrthoProjection(FMat4 M, const float a[2], const float b[2], 
   _mm_store_ps(M[3], T_3);
 }
 
-inline void matFromPersProjection(FMat4 M, const FVec2 a, const FVec2 b, const FVec2 c) {
-  float s1 = a[0] + a[1];
-  float s2 = b[0] + b[1];
-  float s3 = c[0] + c[1];
-  float d1 = a[1] - a[0];
-  float d2 = b[1] - b[0];
-  float d3 = c[1] - c[0];
+inline void matFromPersProjection(FMat4 M, const float a[2], const float b[2], const float c[2]) {
+  float s1 = a[0] + a[1], d1 = a[1] - a[0];
+  float s2 = b[0] + b[1], d2 = b[1] - b[0];
+  float s3 = c[0] + c[1], d3 = c[1] - c[0];
   float r  =c[0] * c[1];
   __m128 T_0 = _mm_setr_ps(2 * c[0] / d1, 0, -s1 / d1, 0);
   __m128 T_1 = _mm_setr_ps(0, 2 * c[0] / d2, -s2 / d2, 0);
