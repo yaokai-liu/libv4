@@ -159,9 +159,9 @@ void matFromLookAt(FMat4 M, const FAffPoint4 eye, const FVec4 look, const FVec4 
 /**
  * make M be a orthographic projection matrix
  * @param M where the output store
- * @param a box [a1, a2] of axis x
- * @param b box [b1, b2] of axis y
- * @param c box [c1, c2] of axis z
+ * @param a box [a1, a2] of axis x, requires a1 < a2
+ * @param b box [b1, b2] of axis y, requires b1 < b2
+ * @param c box [c1, c2] of axis z, requires c1 < c2
  */
 void matFromOrthoProjection(FMat4 M, const float a[2], const float b[2], const float c[2]);
 /**

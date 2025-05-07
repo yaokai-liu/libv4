@@ -345,10 +345,10 @@ inline void intMatRMulMat(IMat4 A, const IMat4 B) {
 }
 
 inline void floatMatDiag(FMat4 A, const FVec4 b) {
-  __m128 A_0 = _mm_set_ps(0.0f, 0.0f, 0.0f, b[0]);
-  __m128 A_1 = _mm_set_ps(0.0f, 0.0f, b[1], 0.0f);
-  __m128 A_2 = _mm_set_ps(0.0f, b[2], 0.0f, 0.0f);
-  __m128 A_3 = _mm_set_ps(b[3], 0.0f, 0.0f, 0.0f);
+  __m128 A_0 = _mm_setr_ps(b[0], 0.0f, 0.0f, 0.0f);
+  __m128 A_1 = _mm_setr_ps(0.0f, b[1], 0.0f, 0.0f);
+  __m128 A_2 = _mm_setr_ps(0.0f, 0.0f, b[2], 0.0f);
+  __m128 A_3 = _mm_setr_ps(0.0f, 0.0f, 0.0f, b[3]);
   _mm_store_ps(A[0], A_0);
   _mm_store_ps(A[1], A_1);
   _mm_store_ps(A[2], A_2);
@@ -545,28 +545,38 @@ inline void matFromAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis) {
 inline void matFromLookAt(FMat4 M, const FAffPoint4 eye, const FVec4 look, const FVec4 up) {
   constexpr int r1 = _MM_SHUFFLE(3, 0, 2, 1);
   constexpr int r2 = _MM_SHUFFLE(3, 1, 0, 2);
-  __m128 e128 = _mm_div_ps(_mm_load_ps(eye), _mm_set1_ps(-eye[3]));
+  __m128 e128 = _mm_div_ps(_mm_load_ps(eye), _mm_set1_ps(eye[3]));
   __m128 l128 = _mm_sub_ps(_mm_load_ps(look), _mm_set_ps(look[3], 0, 0, 0));
   __m128 u128 = _mm_sub_ps(_mm_load_ps(up), _mm_set_ps(up[3], 0, 0, 0));
-  __m128 tmp0 = _mm_shuffle_ps(l128, l128, r1);
-  __m128 tmp1 = _mm_shuffle_ps(u128, u128, r2);
-  __m128 tmp2 = _mm_shuffle_ps(l128, l128, r2);
-  __m128 tmp3 = _mm_shuffle_ps(u128, u128, r1);
-  __m128 r128 = _mm_sub_ps(_mm_mul_ps(tmp2, tmp3), _mm_mul_ps(tmp0, tmp1));
+  __m128 tmp0 = _mm_shuffle_ps(u128, u128, r1);
+  __m128 tmp1 = _mm_shuffle_ps(l128, l128, r2);
+  __m128 tmp2 = _mm_shuffle_ps(u128, u128, r2);
+  __m128 tmp3 = _mm_shuffle_ps(l128, l128, r1);
+  __m128 r128 = _mm_sub_ps(_mm_mul_ps(tmp0, tmp1), _mm_mul_ps(tmp2, tmp3));
+  tmp0 = _mm_shuffle_ps(l128, l128, r1);
+  tmp1 = _mm_shuffle_ps(r128, r128, r2);
+  tmp2 = _mm_shuffle_ps(l128, l128, r2);
+  tmp3 = _mm_shuffle_ps(r128, r128, r1);
+  u128 = _mm_sub_ps(_mm_mul_ps(tmp0, tmp1), _mm_mul_ps(tmp2, tmp3));
   __m128 s128 = _mm_hadd_ps(_mm_hadd_ps(_mm_mul_ps(l128, l128), _mm_setzero_ps()), _mm_setzero_ps());
   __m128 t128 = _mm_hadd_ps(_mm_hadd_ps(_mm_mul_ps(u128, u128), _mm_setzero_ps()), _mm_setzero_ps());
   __m128 w128 = _mm_hadd_ps(_mm_hadd_ps(_mm_mul_ps(r128, r128), _mm_setzero_ps()), _mm_setzero_ps());
-  l128 = _mm_div_ps(l128, _mm_shuffle_ps(s128, s128, _MM_SHUFFLE(0, 0, 0, 0)));
-  u128 = _mm_div_ps(u128, _mm_shuffle_ps(t128, t128, _MM_SHUFFLE(0, 0, 0, 0)));
-  r128 = _mm_div_ps(r128, _mm_shuffle_ps(w128, w128, _MM_SHUFFLE(0, 0, 0, 0)));
-  __m128 t0 = _mm_unpacklo_ps(l128, u128);
-  __m128 t1 = _mm_unpackhi_ps(l128, u128);
-  __m128 t2 = _mm_unpacklo_ps(r128, e128);
-  __m128 t3 = _mm_unpackhi_ps(r128, e128);
-  _mm_store_ps(M[0], _mm_movelh_ps(t0, t2));
-  _mm_store_ps(M[1], _mm_movehl_ps(t2, t0));
-  _mm_store_ps(M[2], _mm_movelh_ps(t1, t3));
-  _mm_store_ps(M[3], _mm_movehl_ps(t3, t1));
+  l128 = _mm_div_ps(l128, _mm_sqrt_ps(_mm_shuffle_ps(s128, s128, _MM_SHUFFLE(0, 0, 0, 0))));
+  u128 = _mm_div_ps(u128, _mm_sqrt_ps(_mm_shuffle_ps(t128, t128, _MM_SHUFFLE(0, 0, 0, 0))));
+  r128 = _mm_div_ps(r128, _mm_sqrt_ps(_mm_shuffle_ps(w128, w128, _MM_SHUFFLE(0, 0, 0, 0))));
+  e128 = _mm_mul_ps(e128, _mm_setr_ps(-1.0f, -1.0f, -1.0f, 1));
+  tmp0 = _mm_mul_ps(e128, r128);
+  tmp1 = _mm_mul_ps(e128, u128);
+  tmp2 = _mm_mul_ps(e128, l128);
+  tmp3 = _mm_setr_ps(0, 0, 0, 1);
+  e128 = _mm_hadd_ps(_mm_hadd_ps(tmp0, tmp1), _mm_hadd_ps(tmp2, tmp3));
+  r128 = _mm_insert_ps(r128, e128, ((0 << 6) | (3 << 4) | 0));
+  u128 = _mm_insert_ps(u128, e128, ((1 << 6) | (3 << 4) | 0));
+  l128 = _mm_insert_ps(l128, e128, ((2 << 6) | (3 << 4) | 0));
+  _mm_store_ps(M[0], r128);
+  _mm_store_ps(M[1], u128);
+  _mm_store_ps(M[2], l128);
+  _mm_store_ps(M[3], _mm_setr_ps(0, 0, 0, 1));
 }
 
 
@@ -601,7 +611,7 @@ inline void matFromPersProjection(FMat4 M, const float a[2], const float b[2], c
 
 
 inline void matAffineScale(FMat4 M, const FVec4 /* treat as FVec3 */ rate) {
-  const FVec4 _rate = {rate[0], rate[1], rate[2], 0};
+  const FVec4 _rate = {rate[0], rate[1], rate[2], rate[3] ? rate[3] : 1.0f};
   floatMatScaleVec(M, _rate);
 }
 
