@@ -599,8 +599,8 @@ inline void matFromPersProjection(FMat4 M, const float a[2], const float b[2], c
   float s2 = b[0] + b[1], d2 = b[1] - b[0];
   float s3 = c[0] + c[1], d3 = c[1] - c[0];
   float r  =c[0] * c[1];
-  __m128 T_0 = _mm_setr_ps(2 * c[0] / d1, 0, -s1 / d1, 0);
-  __m128 T_1 = _mm_setr_ps(0, 2 * c[0] / d2, -s2 / d2, 0);
+  __m128 T_0 = _mm_setr_ps(2 * c[1] / d1, 0, -s1 / d1, 0);
+  __m128 T_1 = _mm_setr_ps(0, 2 * c[1] / d2, -s2 / d2, 0);
   __m128 T_2 = _mm_setr_ps(0, 0,  s3 / d3,  -2 * r / d3);
   __m128 T_3 = _mm_setr_ps(0, 0, 1, 0);
   _mm_store_ps(M[0], T_0);
