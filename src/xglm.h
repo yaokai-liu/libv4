@@ -169,7 +169,7 @@ void matFromOrthoProjection(FMat4 M, const float a[2], const float b[2], const f
  * @param M where the output store
  * @param a box [a1, a2] of axis x, left = a1 and right = a2, of near plane
  * @param b box [b1, b2] of axis y, bottom = b1 and top = a2 of near plane
- * @param c box [c1, c2] of axis z, far = c1 and near = c2
+ * @param c box [c1, c2] of axis z, near = c1 and far = c2
  */
 void matFromPersProjection(FMat4 M, const float a[2], const float b[2], const float c[2]);
 
