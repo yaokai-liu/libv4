@@ -59,7 +59,7 @@ inline int32_t intVecInnerProduct(const IVec4 multiplier, const IVec4 multiplica
   d = _mm_setzero_si128();
   c = _mm_hadd_epi32(c, d);
   c = _mm_hadd_epi32(c, d);
-  int32_t register res;
+  register int32_t res;
   __asm__ __volatile__ ("movd %[c], %[res]": [res] "=r"(res): [c] "x"(c));
   return res;
 }
@@ -72,7 +72,7 @@ inline int32_t intVecConvProduct(const IVec4 multiplier, const IVec4 multiplican
   d = _mm_setzero_si128();
   c = _mm_hadd_epi32(c, d);
   c = _mm_hadd_epi32(c, d);
-  int32_t register res;
+  register int32_t res;
   __asm__ __volatile__ ("movd %[c], %[res]": [res] "=r"(res): [c] "x"(c));
   return res;
 }

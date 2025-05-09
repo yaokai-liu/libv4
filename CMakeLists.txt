@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 project(xglm C)
 
 set(CMAKE_C_STANDARD 23)
+add_compile_options("-Werror" "-Wall" "-Wextra")
 add_compile_options("-msse4" "-mavx2" "-O3")
 
 include_directories(src)
