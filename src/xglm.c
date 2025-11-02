@@ -580,10 +580,10 @@ inline void matFromLookAt(FMat4 M, const FAffPoint4 eye, const FVec4 look, const
 }
 
 
-inline void matFromOrthoProjection(FMat4 M, const float a[2], const float b[2], const float c[2]) {
-  float s1 = a[0] + a[1], d1 = a[1] - a[0];
-  float s2 = b[0] + b[1], d2 = b[1] - b[0];
-  float s3 = c[0] + c[1], d3 = c[1] - c[0];
+inline void matFromOrthoProjection(FMat4 M, const float horizontal[2], const float vertical[2], const float longitudinal[2]) {
+  float s1 = horizontal[0] + horizontal[1], d1 = horizontal[1] - horizontal[0];
+  float s2 = vertical[0] + vertical[1], d2 = vertical[1] - vertical[0];
+  float s3 = longitudinal[0] + longitudinal[1], d3 = longitudinal[1] - longitudinal[0];
   __m128 T_0 = _mm_setr_ps(2 / d1, 0, 0, -s1 / d1);
   __m128 T_1 = _mm_setr_ps(0, 2 / d2, 0, -s2 / d2);
   __m128 T_2 = _mm_setr_ps(0, 0, 2 / d3, -s3 / d3);
@@ -594,14 +594,17 @@ inline void matFromOrthoProjection(FMat4 M, const float a[2], const float b[2], 
   _mm_store_ps(M[3], T_3);
 }
 
-inline void matFromPersProjection(FMat4 M, const float a[2], const float b[2], const float c[2]) {
-  float s1 = a[0] + a[1], d1 = a[1] - a[0];
-  float s2 = b[0] + b[1], d2 = b[1] - b[0];
-  float s3 = c[0] + c[1], d3 = c[1] - c[0];
-  float r  =c[0] * c[1];
-  __m128 T_0 = _mm_setr_ps(2 * c[0] / d1, 0, -s1 / d1, 0);
-  __m128 T_1 = _mm_setr_ps(0, 2 * c[0] / d2, -s2 / d2, 0);
-  __m128 T_2 = _mm_setr_ps(0, 0,  - s3 / d3,  2 * r / d3);
+inline void matFromPersProjection(FMat4 M, const float horizontal[2], const float vertical[2], const float longitudinal[2]) {
+  const float s1 = horizontal[0] + horizontal[1];
+  const float s2 = vertical[0] + vertical[1];
+  const float s3 = longitudinal[0] + longitudinal[1];
+  const float d1 = horizontal[1] - horizontal[0];
+  const float d2 = vertical[1] - vertical[0];
+  const float d3 = longitudinal[1] - longitudinal[0];
+  const float r  = longitudinal[0] * longitudinal[1];
+  __m128 T_0 = _mm_setr_ps( 2*longitudinal[0]/d1, 0, -s1/d1, 0);
+  __m128 T_1 = _mm_setr_ps(0, 2*longitudinal[0]/d2, -s2/d2, 0);
+  __m128 T_2 = _mm_setr_ps(0, 0,  -s3/d3,  2*r/d3);
   __m128 T_3 = _mm_setr_ps(0, 0, 1, 0);
   _mm_store_ps(M[0], T_0);
   _mm_store_ps(M[1], T_1);

@@ -15,18 +15,20 @@
 typedef int32_t IVec2[2];
 /// Vector that has 2 float number elements
 typedef float FVec2[2];
-/// 2x2 Matrix that elements are integer
-typedef int32_t IMat2[2];
-/// 2x2 Matrix that elements are float point number
-typedef float FMat2[2];
+/// 2x2 Matrix that elements are integer, row major order
+typedef int32_t IMat2[2][2];
+/// 2x2 Matrix that elements are float point number, row major order
+typedef float FMat2[2][2];
+
 /// Vector that has 4 integer elements
 typedef int32_t IVec4[4];
 /// Vector that has 4 float number elements
 typedef float FVec4[4];
-/// 4x4 Matrix that elements are integer
+/// 4x4 Matrix that elements are integer, row major order
 typedef int32_t IMat4[4][4];
-/// 4x4 Matrix that elements are float point number
+/// 4x4 Matrix that elements are float point number, row major order
 typedef float FMat4[4][4];
+
 /// Affine Coordinate that all components are integer
 typedef int32_t IAffPoint4[4];
 /// Affine Coordinate that all components are float point number
@@ -142,7 +144,7 @@ void matFromAffineShear(FMat4 M, const FVec4 /* treat as FVec3 */ she);
 void matFromAffineShift(FMat4 M, const FVec4 /* treat as FVec3 */ dis);
 /// make M be the rotate effect
 void matFromAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, float angle);
-/// make M be the reflect effect
+/// make M be the reflection effect
 void matFromAffineReflect(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
 /// make M be the flip effect
 void matFromAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
@@ -157,21 +159,21 @@ void matFromAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
  */
 void matFromLookAt(FMat4 M, const FAffPoint4 eye, const FVec4 look, const FVec4 up);
 /**
- * make M be a orthographic projection matrix
+ * make M be an orthographic projection matrix, target space is [-1, -1, -1] to [1, 1, 1], and screen at near
  * @param M where the output store
- * @param a box [a1, a2] of axis x, requires a1 < a2
- * @param b box [b1, b2] of axis y, requires b1 < b2
- * @param c box [c1, c2] of axis z, requires c1 < c2
+ * @param horizontal    pair [left, right] the clip range in axis x, require left < right
+ * @param vertical      pair [bottom, top] the clip range in axis y, require bottom < top
+ * @param longitudinal  pair [near,   far] the clip range in axis z, requires near < far
  */
-void matFromOrthoProjection(FMat4 M, const float a[2], const float b[2], const float c[2]);
+void matFromOrthoProjection(FMat4 M, const float horizontal[2], const float vertical[2], const float longitudinal[2]);
 /**
- * make M be a perspective projection matrix
+ * make M be a perspective projection matrix, target space is [-1, -1, -1] to [1, 1, 1], and screen at near
  * @param M where the output store
- * @param a box [a1, a2] of axis x, left = a1 and right = a2, of near plane
- * @param b box [b1, b2] of axis y, bottom = b1 and top = a2 of near plane
- * @param c box [c1, c2] of axis z, near = c1 and far = c2
+ * @param horizontal    pair [left, right] the clip range of the near plane in axis x, require left < right
+ * @param vertical      pair [bottom, top] the clip range of the near plane in axis y, require bottom < top
+ * @param longitudinal  pair [near,   far] the clip range in axis z, requires near < far
  */
-void matFromPersProjection(FMat4 M, const float a[2], const float b[2], const float c[2]);
+void matFromPersProjection(FMat4 M, const float horizontal[2], const float vertical[2], const float longitudinal[2]);
 
 
 /// left multiply a scale effect to the M
@@ -182,7 +184,7 @@ void matAffineShear(FMat4 M, const FVec4 /* treat as FVec3 */ she);
 void matAffineRotate(FMat4 M, const FVec4 /* treat as FVec3 */ axis, float angle);
 /// left multiply a shift effect to the M
 void matAffineShift(FMat4 M, const FVec4 /* treat as FVec3 */ dis);
-/// left multiply a reflect effect to the M
+/// left multiply a reflection effect to the M
 void matAffineReflect(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
 /// left multiply a flip effect to the M
 void matAffineFlip(FMat4 M, const FVec4 /* treat as FVec3 */ axis);
