@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 23)
 add_compile_options("-Werror" "-Wall" "-Wextra")
 add_compile_options("-msse4" "-mavx2" "-O3")
 
-include_directories(src)
+include_directories(include)
 
 aux_source_directory(src SRC)
 add_library(xglm STATIC ${SRC})
